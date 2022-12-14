@@ -1,9 +1,12 @@
 import AppKit
+import ElixirKit
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var window : NSWindow!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        ElixirKit.start()
+
         let menuItemOne = NSMenuItem()
         menuItemOne.submenu = NSMenu(title: "Demo")
         menuItemOne.submenu?.items = [

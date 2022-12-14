@@ -6,11 +6,13 @@ let package = Package(
     platforms: [
         .macOS(.v11)
     ],
-    dependencies: [],
+    dependencies: [
+        .package(name: "ElixirKit", path: "../../../elixirkit_swift")
+    ],
     targets: [
         .executableTarget(
             name: "Demo",
-            dependencies: []
+            dependencies: ["ElixirKit"]
         )
     ]
 )
