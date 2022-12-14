@@ -1,0 +1,2 @@
+defmodule ElixirKit do
+end
