@@ -2,10 +2,26 @@ import AppKit
 import ElixirKit
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    private var release : ElixirKit.Release!
     private var window : NSWindow!
+    private var button : NSButton!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        ElixirKit.start()
+        let logPath = "\(NSHomeDirectory())/Library/Logs/Demo.log"
+
+        release = ElixirKit.Release(name: "app", logPath: logPath) { task in
+            if task.terminationStatus != 0 {
+                DispatchQueue.main.sync {
+                    let alert = NSAlert()
+                    alert.alertStyle = .critical
+                    alert.messageText = "release exited with \(task.terminationStatus)"
+                    alert.informativeText = "Logs available at: \(logPath)"
+                    alert.runModal()
+                }
+            }
+
+            NSApp.terminate(nil)
+        }
 
         let menuItemOne = NSMenuItem()
         menuItemOne.submenu = NSMenu(title: "Demo")
@@ -24,10 +40,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.title = "Demo"
         window.center()
         NSApp.activate(ignoringOtherApps: true)
+
+        button = NSButton(title: "Press me!", target: self, action: #selector(buttonPressed))
+        window.contentView!.addSubview(button)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
         return true
+    }
+
+    @objc
+    func buttonPressed() {
+        release.publish("dbg", "button pressed!")
     }
 }
 

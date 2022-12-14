@@ -7,7 +7,8 @@ defmodule Demo.MixProject do
       version: "0.1.0",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
@@ -21,6 +22,20 @@ defmodule Demo.MixProject do
   defp deps do
     [
       {:elixirkit, path: ".."}
+    ]
+  end
+
+  defp releases do
+    [
+      app: [
+        steps: [
+          :assemble,
+          &ElixirKit.bundle/1
+        ],
+        macos: [
+          app_dir: "rel/macos"
+        ]
+      ]
     ]
   end
 end
