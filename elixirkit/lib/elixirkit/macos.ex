@@ -1,6 +1,8 @@
 defmodule ElixirKit.MacOS do
   @moduledoc false
 
+  import ElixirKit.Utils
+
   def bundle(release) do
     options =
       release.options
@@ -230,12 +232,6 @@ defmodule ElixirKit.MacOS do
     %{name: name, dir: dir}
   end
 
-  defp log(color, command, message, options \\ []) do
-    unless options[:quiet] do
-      Mix.shell().info([color, "* #{command} ", :reset, message])
-    end
-  end
-
   defp find_executable_files(dir) do
     "find #{dir} -perm +111 -type f -exec sh -c \"file {} | grep --silent Mach-O\" \\; -print"
     |> sh()
@@ -245,36 +241,5 @@ defmodule ElixirKit.MacOS do
   defp tty do
     tty = sh("ps -p #{System.pid()} | tail -1 | awk '{ print $2 }'")
     "/dev/#{String.trim(tty)}"
-  end
-
-  defp cmd(cmd, args, opts \\ []) do
-    opts = Keyword.put_new(opts, :into, IO.stream())
-    {out, result} = System.cmd(cmd, args, opts)
-
-    if result != 0 do
-      Mix.raise("""
-      Command exited with #{result}
-
-      cmd: #{cmd}
-      args: #{inspect(args, pretty: true)}
-      opts: #{inspect(opts, pretty: true)}
-      """)
-    end
-
-    out
-  end
-
-  defp sh(cmd) do
-    {out, result} = System.shell(cmd)
-
-    if result != 0 do
-      Mix.raise("""
-      Command exited with #{result}
-
-      cmd: #{cmd}
-      """)
-    end
-
-    out
   end
 end
