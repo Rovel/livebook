@@ -4,6 +4,7 @@ public struct Release {
     let scriptPath: String
     let stdout: FileHandle
     let stderr: FileHandle
+    var task: Process
 
     public init(name: String, logPath: String? = nil, terminationHandler: ((Process) -> Void)? = nil) {
         scriptPath = Bundle.main.path(forResource: "rel/bin/\(name)", ofType: "")!
@@ -25,6 +26,7 @@ public struct Release {
         }
 
         let task = Process()
+        self.task = task
         task.launchPath = scriptPath
         task.arguments = ["start"]
         task.standardOutput = stdout
@@ -34,6 +36,12 @@ public struct Release {
         DispatchQueue.global(qos: .userInteractive).async {
             task.waitUntilExit()
             print("task exited")
+        }
+    }
+
+    public func terminate() {
+        if task.isRunning {
+            task.terminate()
         }
     }
 

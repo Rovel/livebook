@@ -46,13 +46,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentView!.addSubview(button)
     }
 
+    func applicationWillTerminate(_ _: Notification) {
+        release.terminate()
+    }
+
     func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
         return true
     }
 
     @objc
     func buttonPressed() {
-        release.publish("dbg", "button pressed!")
+        release.publish("dbg", "Button pressed!")
     }
 }
 
