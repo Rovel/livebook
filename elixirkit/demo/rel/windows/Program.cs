@@ -10,7 +10,6 @@ static class Program
     }
 }
 
-// public class App : ApplicationContext
 public class App : Form
 {
     private NotifyIcon trayIcon;
