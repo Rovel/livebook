@@ -6,7 +6,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var window : NSWindow!
     private var button : NSButton!
 
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
+    func applicationDidFinishLaunching(_ _: Notification) {
         /* let logPath = "\(NSHomeDirectory())/Library/Logs/Demo.log" */
 
         release = ElixirKit.Release(name: "app") { task in
@@ -50,7 +50,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         release.terminate()
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
+    func applicationShouldTerminateAfterLastWindowClosed(_ _: NSApplication) -> Bool {
         return true
     }
 
