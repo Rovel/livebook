@@ -32,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.items = [menuItemOne]
         NSApp.mainMenu = menu
 
-        window = NSWindow(contentRect: NSMakeRect(0, 0, 200, 200),
+        window = NSWindow(contentRect: NSMakeRect(0, 0, 400, 200),
                           styleMask: [.titled, .closable],
                           backing: .buffered,
                           defer: true)
@@ -42,6 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
 
         button = NSButton(title: "Press me!", target: self, action: #selector(buttonPressed))
+        button.setFrameOrigin(NSMakePoint(20, window.contentView!.frame.size.height - 50))
         window.contentView!.addSubview(button)
     }
 
