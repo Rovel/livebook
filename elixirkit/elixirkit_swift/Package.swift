@@ -15,8 +15,7 @@ let package = Package(
     dependencies: [],
     targets: [
         .target(
-            name: "ElixirKit",
-            dependencies: []
+            name: "ElixirKit"
         )
     ]
 )

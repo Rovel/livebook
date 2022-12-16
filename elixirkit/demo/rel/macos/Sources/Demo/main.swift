@@ -7,15 +7,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var button : NSButton!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        let logPath = "\(NSHomeDirectory())/Library/Logs/Demo.log"
+        /* let logPath = "\(NSHomeDirectory())/Library/Logs/Demo.log" */
 
-        release = ElixirKit.Release(name: "app", logPath: logPath) { task in
+        release = ElixirKit.Release(name: "app") { task in
             if task.terminationStatus != 0 {
                 DispatchQueue.main.sync {
                     let alert = NSAlert()
                     alert.alertStyle = .critical
                     alert.messageText = "release exited with \(task.terminationStatus)"
-                    alert.informativeText = "Logs available at: \(logPath)"
+                    /* alert.informativeText = "Logs available at: \(logPath)" */
                     alert.runModal()
                 }
             }
