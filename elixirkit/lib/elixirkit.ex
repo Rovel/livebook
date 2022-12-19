@@ -3,6 +3,9 @@ defmodule ElixirKit do
     case :os.type() do
       {:unix, :darwin} ->
         ElixirKit.MacOS.bundle(release)
+
+      {:win32, _} ->
+        ElixirKit.Windows.bundle(release)
     end
   end
 

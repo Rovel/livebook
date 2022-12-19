@@ -3,21 +3,25 @@ defmodule ElixirKit.MacOS do
 
   import ElixirKit.Utils
 
+  @doc """
+  Bundle the release.
+  """
   def bundle(release) do
     options =
       release.options
-      |> Keyword.fetch!(:macos)
+      |> Keyword.get(:macos, [])
       |> Keyword.validate!([:app_dir, :build_dmg, :notarization])
 
-    %{name: app_name, dir: target_app_dir} = app_config()
-    source_app_dir = Keyword.fetch!(options, :app_dir)
+    %{name: app_name, dir: app_target_dir} = app_config()
+    app_source_dir = Keyword.get(options, :app_dir, "rel/macos")
+    log(:green, "using", app_source_dir)
 
     %{
       app_name: app_name,
       release_path: release.path,
       version: release.version,
-      source_app_dir: source_app_dir,
-      target_app_dir: target_app_dir,
+      app_source_dir: app_source_dir,
+      app_target_dir: app_target_dir,
       build_dmg?: options[:build_dmg] == true,
       notarization: options[:notarization]
     }
@@ -32,22 +36,22 @@ defmodule ElixirKit.MacOS do
   end
 
   defp build_app_dir(context) do
-    log(:green, "creating", Path.relative_to_cwd(context.target_app_dir))
-    File.mkdir_p!("#{context.target_app_dir}/Contents/Resources")
+    log(:green, "creating", Path.relative_to_cwd(context.app_target_dir))
+    File.mkdir_p!("#{context.app_target_dir}/Contents/Resources")
     context
   end
 
   defp copy_release(context) do
     source = Path.relative_to_cwd(context.release_path)
-    target = Path.relative_to_cwd("#{context.target_app_dir}/Contents/Resources/rel")
+    target = Path.relative_to_cwd("#{context.app_target_dir}/Contents/Resources/rel")
     log(:green, "copying", "#{source} to #{target}")
     File.cp_r!(source, target)
     context
   end
 
   defp copy_info_plist(context) do
-    source = Path.relative_to_cwd("#{context.source_app_dir}/Info.plist")
-    target = Path.relative_to_cwd("#{context.target_app_dir}/Contents/Info.plist")
+    source = Path.relative_to_cwd("#{context.app_source_dir}/Info.plist")
+    target = Path.relative_to_cwd("#{context.app_target_dir}/Contents/Info.plist")
 
     if File.exists?(source) do
       data =
@@ -74,7 +78,7 @@ defmodule ElixirKit.MacOS do
 
       for path <- resources do
         basename = Path.basename(path)
-        target = "#{context.target_app_dir}/Contents/Resources/#{basename}"
+        target = "#{context.app_target_dir}/Contents/Resources/#{basename}"
         log(:green, "copying", "#{basename} to #{Path.relative_to_cwd(target)}")
       end
     end
@@ -83,15 +87,15 @@ defmodule ElixirKit.MacOS do
   end
 
   defp build_launcher(context) do
-    launcher_path = "#{context.target_app_dir}/Contents/MacOS/#{context.app_name}"
-    File.mkdir_p!("#{context.target_app_dir}/Contents/MacOS")
+    launcher_path = "#{context.app_target_dir}/Contents/MacOS/#{context.app_name}"
+    File.mkdir_p!("#{context.app_target_dir}/Contents/MacOS")
     log(:green, "creating", Path.relative_to_cwd(launcher_path))
 
     args = ~w(build -c release --arch arm64 --arch x86_64)
-    cmd("swift", args, cd: context.source_app_dir)
+    cmd("swift", args, cd: context.app_source_dir)
 
     spm_release_dir =
-      cmd("swift", args ++ ["--show-bin-path"], cd: context.source_app_dir, into: "")
+      cmd("swift", args ++ ["--show-bin-path"], cd: context.app_source_dir, into: "")
       |> String.trim()
 
     File.cp!("#{spm_release_dir}/#{context.app_name}", launcher_path)
@@ -112,7 +116,7 @@ defmodule ElixirKit.MacOS do
 
     log(:green, "signing", Path.relative_to_cwd(app_dir))
     to_sign = find_executable_files(app_dir) ++ [app_dir]
-    entitlements_path = "#{context.source_app_dir}/#{context.app_name}.entitlements"
+    entitlements_path = "#{context.app_source_dir}/#{context.app_name}.entitlements"
     codesign(to_sign, context.notarization, entitlements_path)
 
     dmg_path = "#{Mix.Project.build_path()}/#{context.app_name}Install.dmg"
@@ -163,6 +167,9 @@ defmodule ElixirKit.MacOS do
     ])
   end
 
+  @doc """
+  Build the app.
+  """
   def build_app do
     %{dir: dir} = app_config()
 
@@ -178,7 +185,10 @@ defmodule ElixirKit.MacOS do
     )
   end
 
-  def open_app do
+  @doc """
+  Run the app.
+  """
+  def run_app do
     %{name: name, dir: dir} = app_config()
 
     # open app

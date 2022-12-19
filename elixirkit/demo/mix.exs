@@ -31,9 +31,6 @@ defmodule Demo.MixProject do
         steps: [
           :assemble,
           &ElixirKit.bundle/1
-        ],
-        macos: [
-          app_dir: "rel/macos"
         ]
       ]
     ]

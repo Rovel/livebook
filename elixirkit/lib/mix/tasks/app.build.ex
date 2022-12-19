@@ -6,6 +6,9 @@ defmodule Mix.Tasks.App.Build do
     case :os.type() do
       {:unix, :darwin} ->
         ElixirKit.MacOS.build_app()
+
+      {:win32, _} ->
+        ElixirKit.Windows.build_app()
     end
 
     :ok
