@@ -91,7 +91,7 @@ defmodule ElixirKit.MacOS do
     File.mkdir_p!("#{context.app_target_dir}/Contents/MacOS")
     log(:green, "creating", Path.relative_to_cwd(launcher_path))
 
-    args = ~w(build --configuration release --arch arm64 --arch x86_64)
+    args = ~w(build --configuration #{configuration()} --arch arm64 --arch x86_64)
     cmd("swift", args, cd: context.app_source_dir)
 
     spm_release_dir =
@@ -251,5 +251,12 @@ defmodule ElixirKit.MacOS do
   defp tty do
     tty = sh("ps -p #{System.pid()} | tail -1 | awk '{ print $2 }'")
     "/dev/#{String.trim(tty)}"
+  end
+
+  defp configuration do
+    case Mix.env() do
+      :prod -> "release"
+      _ -> "debug"
+    end
   end
 end

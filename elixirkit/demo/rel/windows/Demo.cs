@@ -1,5 +1,7 @@
 namespace Demo;
 
+using System.Windows.Forms;
+
 static class Demo
 {
     [STAThread]
@@ -19,7 +21,7 @@ public class App : Form
     {
         release = new ElixirKit.Release(exited: ReleaseExited);
 
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+        this.AutoScaleMode = AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(800, 450);
         this.Text = "Demo";
         FormClosing += HandleFormClosing;
@@ -30,7 +32,7 @@ public class App : Form
         button.Click += HandleButtonClicked;
         Controls.Add(button);
 
-        ContextMenuStrip menu = new System.Windows.Forms.ContextMenuStrip();
+        ContextMenuStrip menu = new ContextMenuStrip();
         menu.Items.Add("Exit", null, HandleExitClicked);
         Icon icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath)!;
 
@@ -47,7 +49,15 @@ public class App : Form
     private void ReleaseExited(object? sender, EventArgs e)
     {
         System.Diagnostics.Process process = (System.Diagnostics.Process)sender!;
-        Console.WriteLine($"release exited with {process.ExitCode}");
+        if (process.ExitCode != 0) {
+            MessageBox.Show(
+                $"release exited with code: {process.ExitCode}",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
+        }
+        Application.Exit();
     }
 
     private void HandleFormClosing(object? sender, FormClosingEventArgs e)

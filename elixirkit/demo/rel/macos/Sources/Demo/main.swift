@@ -14,7 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 DispatchQueue.main.sync {
                     let alert = NSAlert()
                     alert.alertStyle = .critical
-                    alert.messageText = "release exited with \(task.terminationStatus)"
+                    alert.messageText = "release exited with code: \(task.terminationStatus)"
                     /* alert.informativeText = "Logs available at: \(logPath)" */
                     alert.runModal()
                 }
