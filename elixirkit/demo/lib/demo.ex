@@ -22,8 +22,16 @@ defmodule Demo.Server do
 
   @impl true
   def init(_) do
+    dbg(:starting)
+    Process.flag(:trap_exit, true)
     ElixirKit.subscribe()
     {:ok, nil}
+  end
+
+  @impl true
+  def terminate(_reason, _state) do
+    dbg(:terminating)
+    nil
   end
 
   @impl true

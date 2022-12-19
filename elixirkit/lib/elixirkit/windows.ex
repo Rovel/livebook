@@ -13,6 +13,9 @@ defmodule ElixirKit.Windows do
       |> Keyword.validate!([:app_dir])
       |> Keyword.get(:app_dir, "rel/windows")
 
+    log(:green, :killing, "epmd.exe")
+    System.cmd("taskkill.exe", ~w(/F /IM epmd.exe))
+
     log(:green, "using", app_source_dir)
 
     %{

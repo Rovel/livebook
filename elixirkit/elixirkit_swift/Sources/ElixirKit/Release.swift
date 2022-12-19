@@ -35,7 +35,6 @@ public struct Release {
         try! task.run()
         DispatchQueue.global(qos: .userInteractive).async {
             task.waitUntilExit()
-            print("task exited")
         }
     }
 

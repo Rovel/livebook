@@ -1,39 +1,56 @@
 namespace ElixirKit;
 
+using System.Diagnostics;
+
 public class Release
 {
-    private System.Diagnostics.Process process;
+    private Process process;
 
-    public Release()
+    public Release(EventHandler? exited)
     {
-        Console.WriteLine(AppDomain.CurrentDomain.BaseDirectory);
-        process = new System.Diagnostics.Process();
+        process = ReleaseCommand("start");
+        process.EnableRaisingEvents = true;
+        if (exited != null) {
+            process.Exited += exited;
+        }
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+    }
+
+    public Release() : this(exited: null) {}
+
+    public void Terminate()
+    {
+        process = ReleaseCommand("stop");
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        process.WaitForExit();
+    }
+
+    private Process ReleaseCommand(String command)
+    {
+        Process process = new Process();
+        process.StartInfo.RedirectStandardInput = true;
+        process.StartInfo.RedirectStandardOutput = true;
+        process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
+        process.StartInfo.RedirectStandardError = true;
+        process.StartInfo.StandardErrorEncoding = System.Text.Encoding.UTF8;
+        process.OutputDataReceived += new System.Diagnostics.DataReceivedEventHandler((sender, e) => {
+            if (!String.IsNullOrEmpty(e.Data)) {
+                Console.WriteLine(e.Data);
+            }
+        });
+        process.ErrorDataReceived += new System.Diagnostics.DataReceivedEventHandler((sender, e) => {
+            if (!String.IsNullOrEmpty(e.Data)) {
+                Console.Error.WriteLine(e.Data);
+            }
+        });
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
         process.StartInfo.FileName = "cmd.exe";
-        process.StartInfo.Arguments = "/c \"echo foo\"";
-        process.EnableRaisingEvents = true;
-        process.Exited += Exited;
-        process.Start();
-        process.WaitForExit();
-
-        /* startProc.StartInfo.FileName = "cmd.exe" */
-        /* startProc.StartInfo.Arguments = "/c """ & script & """ start" */
-        /* startProc.StartInfo.UseShellExecute = false */
-        /* startProc.StartInfo.CreateNoWindow = true */
-        /* startProc.StartInfo.RedirectStandardError = true */
-        /* startProc.StartInfo.StandardErrorEncoding = System.Text.Encoding.UTF8 */
-        /* startProc.Start() */
-        /* Dim errorMessage = startProc.StandardError.ReadToEnd() */
-        /* startProc.WaitForExit() */
-    }
-
-    private void Exited(object? sender, System.EventArgs e)
-    {
-        Console.WriteLine(
-            $"Exit time    : {process.ExitTime}\n" +
-            $"Exit code    : {process.ExitCode}\n" +
-            $"Elapsed time : {Math.Round((process.ExitTime - process.StartTime).TotalMilliseconds)}"
-        );
+        process.StartInfo.Arguments = $"/c \"{AppDomain.CurrentDomain.BaseDirectory}rel\\bin\\app.bat {command}\"";
+        return process;
     }
 }

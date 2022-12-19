@@ -1,6 +1,6 @@
 namespace Demo;
 
-static class Program
+static class Demo
 {
     [STAThread]
     static void Main()
@@ -17,7 +17,7 @@ public class App : Form
 
     public App()
     {
-        release = new ElixirKit.Release();
+        release = new ElixirKit.Release(exited: ReleaseExited);
 
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(800, 450);
@@ -44,9 +44,16 @@ public class App : Form
         trayIcon.Click += HandleIconClicked;
     }
 
+    private void ReleaseExited(object? sender, EventArgs e)
+    {
+        System.Diagnostics.Process process = (System.Diagnostics.Process)sender!;
+        Console.WriteLine($"release exited with {process.ExitCode}");
+    }
+
     private void HandleFormClosing(object? sender, FormClosingEventArgs e)
     {
         trayIcon.Visible = false;
+        release.Terminate();
     }
 
     private void HandleButtonClicked(object? sender, EventArgs e)
