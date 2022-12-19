@@ -29,9 +29,11 @@ defmodule ElixirKit.Windows do
     release
   end
 
+  @default_configuration "Release"
+
   defp build_app_dir(context) do
-    cmd("dotnet", ~w(build), cd: context.app_source_dir)
-    [exe | _] = Path.wildcard("#{context.app_source_dir}/bin/**/*.exe")
+    cmd("dotnet", ~w(build --configuration #{@default_configuration}), cd: context.app_source_dir)
+    [exe | _] = Path.wildcard("#{context.app_source_dir}/bin/#{@default_configuration}/**/*.exe")
     app_target_dir = Path.dirname(exe)
     %{context | app_target_dir: app_target_dir}
   end
@@ -55,6 +57,6 @@ defmodule ElixirKit.Windows do
   Run the app.
   """
   def run_app do
-    cmd("dotnet", ~w(run --no-build), cd: "rel/windows")
+    cmd("dotnet", ~w(run --configuration #{@default_configuration} --no-build), cd: "rel/windows")
   end
 end

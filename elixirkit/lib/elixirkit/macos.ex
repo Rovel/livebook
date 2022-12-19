@@ -91,7 +91,7 @@ defmodule ElixirKit.MacOS do
     File.mkdir_p!("#{context.app_target_dir}/Contents/MacOS")
     log(:green, "creating", Path.relative_to_cwd(launcher_path))
 
-    args = ~w(build -c release --arch arm64 --arch x86_64)
+    args = ~w(build --configuration release --arch arm64 --arch x86_64)
     cmd("swift", args, cd: context.app_source_dir)
 
     spm_release_dir =
