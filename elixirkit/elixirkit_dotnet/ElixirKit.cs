@@ -20,6 +20,19 @@ public class Release
 
     public Release() : this(exited: null) {}
 
+    public void Publish(String name, String data)
+    {
+        if (System.Text.RegularExpressions.Regex.IsMatch(name.ToLower(), @"^[a-zA-Z0-9-_]+$")) {
+            process = ReleaseCommand($"rpc ElixirKit.__rpc__(:{name})");
+            process.StartInfo.RedirectStandardInput = true;
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            process.StandardInput.WriteLine(data);
+            process.WaitForExit();
+        }
+    }
+
     public void Terminate()
     {
         process = ReleaseCommand("stop");
@@ -32,7 +45,6 @@ public class Release
     private Process ReleaseCommand(String command)
     {
         Process process = new Process();
-        process.StartInfo.RedirectStandardInput = true;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
         process.StartInfo.RedirectStandardError = true;

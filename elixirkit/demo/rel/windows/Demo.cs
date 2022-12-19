@@ -58,7 +58,7 @@ public class App : Form
 
     private void HandleButtonClicked(object? sender, EventArgs e)
     {
-        Console.WriteLine("Button pressed!");
+        release.Publish("dbg", "Button pressed!");
     }
 
     private void HandleIconClicked(object? sender, EventArgs e)
@@ -66,7 +66,7 @@ public class App : Form
         MouseEventArgs mouseEventArgs = (MouseEventArgs)e;
 
         if (mouseEventArgs.Button == MouseButtons.Left) {
-            Console.WriteLine("Notify Icon clicked!");
+            release.Publish("dbg", "Notify Icon clicked!");
         }
     }
 
