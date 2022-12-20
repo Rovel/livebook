@@ -1,6 +1,7 @@
 namespace ElixirKit;
 
 using System.Diagnostics;
+using System.IO.Pipes;
 
 public class Release
 {
@@ -8,9 +9,12 @@ public class Release
 
     public Release(EventHandler? exited)
     {
+        var pipe = new NamedPipeServerStream("ElixirKit.Demo");
+
         process = ReleaseCommand("start");
         process.EnableRaisingEvents = true;
-        if (exited != null) {
+        if (exited != null)
+        {
             process.Exited += exited;
         }
         process.Start();
@@ -49,13 +53,17 @@ public class Release
         process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
         process.StartInfo.RedirectStandardError = true;
         process.StartInfo.StandardErrorEncoding = System.Text.Encoding.UTF8;
-        process.OutputDataReceived += new System.Diagnostics.DataReceivedEventHandler((sender, e) => {
-            if (!String.IsNullOrEmpty(e.Data)) {
+        process.OutputDataReceived += new System.Diagnostics.DataReceivedEventHandler((sender, e) =>
+        {
+            if (!String.IsNullOrEmpty(e.Data))
+            {
                 Console.WriteLine(e.Data);
             }
         });
-        process.ErrorDataReceived += new System.Diagnostics.DataReceivedEventHandler((sender, e) => {
-            if (!String.IsNullOrEmpty(e.Data)) {
+        process.ErrorDataReceived += new System.Diagnostics.DataReceivedEventHandler((sender, e) =>
+        {
+            if (!String.IsNullOrEmpty(e.Data))
+            {
                 Console.Error.WriteLine(e.Data);
             }
         });

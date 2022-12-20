@@ -8,7 +8,11 @@ defmodule ElixirKit.Utils do
   end
 
   def cmd(cmd, args, opts \\ []) do
-    opts = Keyword.put_new(opts, :into, IO.stream())
+    opts =
+      opts
+      |> Keyword.put_new(:into, IO.stream())
+      |> Keyword.put_new(:stderr_to_stdout, true)
+
     {out, result} = System.cmd(cmd, args, opts)
 
     if result != 0 do
