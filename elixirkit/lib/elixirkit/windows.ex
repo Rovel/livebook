@@ -54,8 +54,16 @@ defmodule ElixirKit.Windows do
   @doc """
   Run the app.
   """
-  def run_app do
-    cmd("dotnet", ~w(run --configuration #{configuration()} --no-build), cd: "rel/windows")
+  def run_app(args) do
+    args =
+      [
+        "run",
+        "--configuration",
+        configuration(),
+        "--no-build"
+      ] ++ args
+
+    cmd("dotnet", args, cd: "rel/windows")
   end
 
   defp configuration do

@@ -1,54 +1,42 @@
 namespace ElixirKit;
 
 using System.Diagnostics;
-using System.IO.Pipes;
 
-public class Release
+public class BadEventNameException : Exception
 {
-    private Process process;
+    public BadEventNameException(string name) : base($"{name} is invalid") {}
+}
 
-    public Release(EventHandler? exited)
+public class ReleaseScript
+{
+    public Process Start()
     {
-        var pipe = new NamedPipeServerStream("ElixirKit.Demo");
-
-        process = ReleaseCommand("start");
-        process.EnableRaisingEvents = true;
-        if (exited != null)
-        {
-            process.Exited += exited;
-        }
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
+        return ReleaseCommand("start");
     }
 
-    public Release() : this(exited: null) {}
-
-    public void Publish(String name, String data)
+    public Process Publish(String name, String data)
     {
-        if (System.Text.RegularExpressions.Regex.IsMatch(name.ToLower(), @"^[a-zA-Z0-9-_]+$")) {
-            process = ReleaseCommand($"rpc ElixirKit.__rpc__(:{name})");
-            process.StartInfo.RedirectStandardInput = true;
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            process.StandardInput.WriteLine(data);
-            process.WaitForExit();
+        if (!System.Text.RegularExpressions.Regex.IsMatch(name.ToLower(), @"^[a-zA-Z0-9-_]+$")) {
+            throw new BadEventNameException(name);
         }
-    }
 
-    public void Terminate()
-    {
-        process = ReleaseCommand("stop");
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
+        var process = ReleaseCommand($"rpc ElixirKit.__publish__(:{name})");
+        process.StandardInput.WriteLine(data);
         process.WaitForExit();
+        return process;
     }
 
-    private Process ReleaseCommand(String command)
+    public Process Stop()
     {
-        Process process = new Process();
+        var process = ReleaseCommand("stop");
+        process.WaitForExit();
+        return process;
+    }
+
+    private Process ReleaseCommand(String command, EventHandler? exited = null)
+    {
+        var process = new Process();
+        process.StartInfo.RedirectStandardInput = true;
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
         process.StartInfo.RedirectStandardError = true;
@@ -71,6 +59,16 @@ public class Release
         process.StartInfo.CreateNoWindow = true;
         process.StartInfo.FileName = "cmd.exe";
         process.StartInfo.Arguments = $"/c \"{AppDomain.CurrentDomain.BaseDirectory}rel\\bin\\app.bat {command}\"";
+
+        if (exited != null)
+        {
+            process.EnableRaisingEvents = true;
+            process.Exited += exited;
+        }
+
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
         return process;
     }
 }

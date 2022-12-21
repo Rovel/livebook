@@ -53,7 +53,7 @@ public struct Release {
             input.fileHandleForWriting.write("\(data)\n".data(using: .utf8)!)
             let task = Process()
             task.launchPath = scriptPath
-            task.arguments = ["rpc", "ElixirKit.__rpc__(:\(name))"]
+            task.arguments = ["rpc", "ElixirKit.__publish__(:\(name))"]
             task.standardInput = input
             task.terminationHandler = terminationHandler
             try! task.run()

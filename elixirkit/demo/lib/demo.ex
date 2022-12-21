@@ -5,7 +5,15 @@ defmodule Demo.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      Demo.Server
+      Demo.Server,
+      {Task, fn ->
+          for i <- 10..1//-1 do
+            IO.puts "#{i}..."
+            Process.sleep(1000)
+          end
+          System.stop()
+        end
+      }
     ]
 
     opts = [strategy: :one_for_one, name: Demo.Supervisor]

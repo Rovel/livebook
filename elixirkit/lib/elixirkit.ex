@@ -13,7 +13,7 @@ defmodule ElixirKit do
     {:ok, _} = Registry.register(ElixirKit.Registry, "subscribers", [])
   end
 
-  def __rpc__(name) do
+  def __publish__(name) do
     data = IO.read(:line) |> String.trim()
     send(ElixirKit.Server, {:publish, name, data})
   end

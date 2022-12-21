@@ -40,7 +40,7 @@ Section "-RegisterFile"
   WriteRegStr HKCR ".${FileExt}" "" "${ProgId}"
   WriteRegStr HKCR "${ProgId}" "" "${App}"
   WriteRegStr HKCR "${ProgId}\DefaultIcon" "" "$INSTDIR\${App}.exe,0"
-  WriteRegStr HKCR "${ProgId}\shell\open\command" "" '"$INSTDIR\${App}.exe" "open_file:%1"'
+  WriteRegStr HKCR "${ProgId}\shell\open\command" "" '"$INSTDIR\${App}.exe" "%1"'
 SectionEnd
 
 Section "-un.RegisterFile"
@@ -56,7 +56,7 @@ Section "-RegisterURL"
   WriteRegStr HKCR "${URLScheme}" "" "${URLScheme} Protocol"
   WriteRegStr HKCR "${URLScheme}" "URL Protocol" ""
   WriteRegStr HKCR "${URLScheme}\DefaultIcon" "" "$INSTDIR\${App}.exe,0"
-  WriteRegStr HKCR "${URLScheme}\shell\open\command" "" '"$INSTDIR\${App}.exe" "open_url:%1"'
+  WriteRegStr HKCR "${URLScheme}\shell\open\command" "" '"$INSTDIR\${App}.exe" "%1"'
 SectionEnd
 
 Section "-un.RegisterURL"
