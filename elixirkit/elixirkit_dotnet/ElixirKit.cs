@@ -14,6 +14,17 @@ public class InvalidMessageException : Exception
     public InvalidMessageException(string message) : base($"'{message}' is invalid") {}
 }
 
+public class API
+{
+    private static Mutex? mutex = null;
+
+    public API()
+    {
+        // https://learn.microsoft.com/en-us/dotnet/api/system.io.memorymappedfiles.memorymappedfile.createnew?view=net-7.0
+        mutex = new Mutex(true, "", out isMainInstance);
+    }
+}
+
 public class ReleaseScript
 {
     public Process? serverProcess;

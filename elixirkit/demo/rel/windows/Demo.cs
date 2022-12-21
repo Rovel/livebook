@@ -10,6 +10,8 @@ static class Demo
     [STAThread]
     static void Main(String[] args)
     {
+        var elixirkit = new ElixirKit.API();
+
         bool isMainInstance = false;
         mutex = new Mutex(true, "com.example.Demo", out isMainInstance);
         var release = new ElixirKit.ReleaseScript();
