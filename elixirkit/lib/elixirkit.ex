@@ -11,8 +11,15 @@ defmodule ElixirKit do
       "elixirkit:event:" <> rest ->
         [name, data] = String.split(rest, ":", parts: 2)
         data = data |> String.trim_trailing() |> Base.decode64!()
-        send(ElixirKit.Server, {:event, name, data})
-        __gets__()
+
+        case name do
+          "elixirkit.stop" ->
+            System.stop()
+
+          _ ->
+            send(ElixirKit.Server, {:event, name, data})
+            __gets__()
+        end
     end
   end
 
@@ -28,10 +35,5 @@ defmodule ElixirKit do
 
   def subscribe do
     {:ok, _} = Registry.register(ElixirKit.Registry, "subscribers", [])
-  end
-
-  def __publish__(name) do
-    data = IO.read(:line) |> String.trim()
-    send(ElixirKit.Server, {:event, name, data})
   end
 end

@@ -16,28 +16,28 @@ public class InvalidMessageException : Exception
 
 public class ReleaseScript
 {
-    public Process Start(EventHandler? handler = null)
+    public Process? serverProcess;
+
+    public void Start(EventHandler? handler = null)
     {
-        return ReleaseCommand("start", handler);
+        serverProcess = ReleaseCommand("start", handler);
     }
 
-    public Process Publish(String name, String data)
+    public void Publish(String name, String data)
     {
-        if (!System.Text.RegularExpressions.Regex.IsMatch(name.ToLower(), @"^[a-zA-Z0-9-_]+$")) {
+        if (!System.Text.RegularExpressions.Regex.IsMatch(name.ToLower(), @"^[a-zA-Z0-9-_\\.]+$")) {
             throw new ElixirKit.InvalidEventNameException(name);
         }
 
-        var process = ReleaseCommand($"rpc ElixirKit.__publish__(:{name})");
-        process.StandardInput.WriteLine(data);
-        process.WaitForExit();
-        return process;
+        var bytes = System.Text.Encoding.UTF8.GetBytes(data);
+        var base64 = System.Convert.ToBase64String(bytes);
+        serverProcess!.StandardInput.Write($"elixirkit:event:{name}:");
+        serverProcess!.StandardInput.WriteLine(base64);
     }
 
-    public Process Stop()
+    public void Stop()
     {
-        var process = ReleaseCommand("stop");
-        process.WaitForExit();
-        return process;
+        Publish("elixirkit.stop", "");
     }
 
     private Process ReleaseCommand(String command, EventHandler? handler = null)

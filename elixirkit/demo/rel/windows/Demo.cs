@@ -22,14 +22,14 @@ static class Demo
 
         if (isMainInstance)
         {
-            var process = release.Start(HandleEvent);
+            release.Start(HandleEvent);
 
             var t = Task.Run(() => {
-                process.WaitForExit();
+                release.serverProcess!.WaitForExit();
 
-                if (process.ExitCode != 0) {
+                if (release.serverProcess!.ExitCode != 0) {
                     MessageBox.Show(
-                        $"release exited with code: {process.ExitCode}",
+                        $"release exited with code: {release.serverProcess!.ExitCode}",
                         "Error",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error
@@ -40,11 +40,10 @@ static class Demo
             });
 
             ApplicationConfiguration.Initialize();
-            Application.Run(new App(release, process, input));
+            Application.Run(new App(release, input));
 
             if (!t.IsCompleted)
             {
-                Console.WriteLine($"stopping release");
                 release.Stop();
             }
         }
@@ -85,14 +84,12 @@ static class Demo
 public class App : Form
 {
     private ElixirKit.ReleaseScript release;
-    private System.Diagnostics.Process process;
     private NotifyIcon trayIcon;
     private Label label;
 
-    public App(ElixirKit.ReleaseScript release, System.Diagnostics.Process process, String? input)
+    public App(ElixirKit.ReleaseScript release, String? input)
     {
         this.release = release;
-        this.process = process;
         Icon icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath)!;
 
         this.AutoScaleMode = AutoScaleMode.Font;
@@ -127,7 +124,7 @@ public class App : Form
 
     private void UrlOpened(System.Uri uri)
     {
-        release.Publish("log", uri.AbsoluteUri);
+        /* release.Publish("log", uri.AbsoluteUri); */
     }
 
     private void HandleFormClosing(object? sender, FormClosingEventArgs e)
@@ -137,19 +134,17 @@ public class App : Form
 
     private void HandleButtonClicked(object? sender, EventArgs e)
     {
-        Publish("log", "Button pressed!!!");
+        var data = "Button pressed!";
+        log(data);
+        release.Publish("log", data);
     }
 
-    private void Publish(String name, String data)
+    private void log(String data)
     {
-        if (!System.Text.RegularExpressions.Regex.IsMatch(name.ToLower(), @"^[a-zA-Z0-9-_]+$")) {
-            throw new ElixirKit.InvalidEventNameException(name);
-        }
-
-        var bytes = System.Text.Encoding.UTF8.GetBytes(data);
-        var base64 = System.Convert.ToBase64String(bytes);
-        process.StandardInput.Write($"elixirkit:event:{name}:");
-        process.StandardInput.WriteLine(base64);
+        var timestamp = DateTime.UtcNow.ToString("HH:mm:ss.fff");
+        Console.Write(timestamp);
+        Console.Write("Z [client] ");
+        Console.WriteLine(data);
     }
 
     private void HandleIconClicked(object? sender, EventArgs e)
@@ -157,7 +152,7 @@ public class App : Form
         MouseEventArgs mouseEventArgs = (MouseEventArgs)e;
 
         if (mouseEventArgs.Button == MouseButtons.Left) {
-            release.Publish("log", "Notify Icon clicked!");
+            /* release.Publish("log", "Notify Icon clicked!"); */
         }
     }
 
