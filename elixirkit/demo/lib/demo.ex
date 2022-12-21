@@ -28,10 +28,12 @@ defmodule Demo.Server do
 
     Task.start(fn ->
       for i <- 5..1//-1 do
-        log("#{i}...")
-        ElixirKit.publish("log", "Terminating in #{i}...")
+        data = "Terminating in #{i}..."
+        log(data)
+        ElixirKit.publish("log", data)
         Process.sleep(1000)
       end
+
       System.stop()
     end)
 
@@ -40,7 +42,7 @@ defmodule Demo.Server do
 
   @impl true
   def terminate(_reason, _state) do
-    log("terminating")
+    log("Terminating")
     nil
   end
 

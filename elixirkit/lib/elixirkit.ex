@@ -1,6 +1,6 @@
 defmodule ElixirKit do
   def publish(name, data) do
-    IO.puts("elixirkit:event:#{name}:#{data}")
+    IO.puts(["elixirkit:event:", name, ":", Base.encode64(data)])
   end
 
   def __gets__ do

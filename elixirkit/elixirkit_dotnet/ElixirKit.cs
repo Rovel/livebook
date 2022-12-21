@@ -4,14 +4,14 @@ using System.Diagnostics;
 
 public delegate void EventHandler(String name, String data);
 
-public class BadEventNameException : Exception
+public class InvalidEventNameException : Exception
 {
-    public BadEventNameException(string name) : base($"{name} is invalid") {}
+    public InvalidEventNameException(string name) : base($"'{name}' is invalid") {}
 }
 
-public class BadMessage : Exception
+public class InvalidMessageException : Exception
 {
-    public BadMessage(string message) : base($"{message} is invalid") {}
+    public InvalidMessageException(string message) : base($"'{message}' is invalid") {}
 }
 
 public class ReleaseScript
@@ -24,7 +24,7 @@ public class ReleaseScript
     public Process Publish(String name, String data)
     {
         if (!System.Text.RegularExpressions.Regex.IsMatch(name.ToLower(), @"^[a-zA-Z0-9-_]+$")) {
-            throw new BadEventNameException(name);
+            throw new ElixirKit.InvalidEventNameException(name);
         }
 
         var process = ReleaseCommand($"rpc ElixirKit.__publish__(:{name})");
@@ -54,12 +54,20 @@ public class ReleaseScript
             {
                 if (e.Data.StartsWith("elixirkit:"))
                 {
+                    // elixirkit:event:<name>:<data>
                     string[] parts = e.Data.Split(':', 4);
                     String kind = parts[1];
 
                     if (handler != null && parts[1] == "event")
                     {
-                        handler!(parts[2], parts[3]);
+                        var name = parts[2];
+                        var bytes = System.Convert.FromBase64String(parts[3]);
+                        var data = System.Text.Encoding.UTF8.GetString(bytes);
+                        handler!(name, data);
+                    }
+                    else
+                    {
+                        throw new ElixirKit.InvalidMessageException(e.Data);
                     }
                 }
                 else

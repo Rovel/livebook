@@ -143,7 +143,7 @@ public class App : Form
     private void Publish(String name, String data)
     {
         if (!System.Text.RegularExpressions.Regex.IsMatch(name.ToLower(), @"^[a-zA-Z0-9-_]+$")) {
-            throw new ElixirKit.BadEventNameException(name);
+            throw new ElixirKit.InvalidEventNameException(name);
         }
 
         var bytes = System.Text.Encoding.UTF8.GetBytes(data);
