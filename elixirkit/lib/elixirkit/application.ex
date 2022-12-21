@@ -7,7 +7,8 @@ defmodule ElixirKit.Application do
     children = [
       {Registry,
        name: ElixirKit.Registry, keys: :duplicate, partitions: System.schedulers_online()},
-      ElixirKit.Server
+      ElixirKit.Server,
+      {Task, fn -> ElixirKit.__gets__() end},
     ]
 
     opts = [strategy: :one_for_one, name: ElixirKit.Supervisor]

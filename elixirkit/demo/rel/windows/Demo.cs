@@ -22,7 +22,7 @@ static class Demo
 
         if (isMainInstance)
         {
-            var process = release.Start();
+            var process = release.Start(HandleEvent);
 
             var t = Task.Run(() => {
                 process.WaitForExit();
@@ -40,7 +40,7 @@ static class Demo
             });
 
             ApplicationConfiguration.Initialize();
-            Application.Run(new App(release, input));
+            Application.Run(new App(release, process, input));
 
             if (!t.IsCompleted)
             {
@@ -52,25 +52,47 @@ static class Demo
         {
             if (input == null)
             {
-                release.Publish("dbg", "reopened app");
+                release.Publish("log", "reopened app");
             }
             else
             {
-                release.Publish("dbg", input);
+                release.Publish("log", input);
             }
         }
+    }
+
+    private static void HandleEvent(String name, String data)
+    {
+        if (name == "log")
+        {
+            log(data);
+        }
+        else
+        {
+            log($"unknown event with name={name} and data={data}");
+        }
+    }
+
+    private static void log(String data)
+    {
+        var timestamp = DateTime.UtcNow.ToString("HH:mm:ss.fff");
+        Console.Write(timestamp);
+        Console.Write("Z [client] ");
+        Console.WriteLine(data);
     }
 }
 
 public class App : Form
 {
     private ElixirKit.ReleaseScript release;
+    private System.Diagnostics.Process process;
     private NotifyIcon trayIcon;
     private Label label;
 
-    public App(ElixirKit.ReleaseScript release, String? input)
+    public App(ElixirKit.ReleaseScript release, System.Diagnostics.Process process, String? input)
     {
         this.release = release;
+        this.process = process;
         Icon icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath)!;
 
         this.AutoScaleMode = AutoScaleMode.Font;
@@ -105,7 +127,7 @@ public class App : Form
 
     private void UrlOpened(System.Uri uri)
     {
-        release.Publish("dbg", uri.AbsoluteUri);
+        release.Publish("log", uri.AbsoluteUri);
     }
 
     private void HandleFormClosing(object? sender, FormClosingEventArgs e)
@@ -115,7 +137,19 @@ public class App : Form
 
     private void HandleButtonClicked(object? sender, EventArgs e)
     {
-        release.Publish("dbg", "Button pressed!");
+        Publish("log", "Button pressed!!!");
+    }
+
+    private void Publish(String name, String data)
+    {
+        if (!System.Text.RegularExpressions.Regex.IsMatch(name.ToLower(), @"^[a-zA-Z0-9-_]+$")) {
+            throw new ElixirKit.BadEventNameException(name);
+        }
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(data);
+        var base64 = System.Convert.ToBase64String(bytes);
+        process.StandardInput.Write($"elixirkit:event:{name}:");
+        process.StandardInput.WriteLine(base64);
     }
 
     private void HandleIconClicked(object? sender, EventArgs e)
@@ -123,7 +157,7 @@ public class App : Form
         MouseEventArgs mouseEventArgs = (MouseEventArgs)e;
 
         if (mouseEventArgs.Button == MouseButtons.Left) {
-            release.Publish("dbg", "Notify Icon clicked!");
+            release.Publish("log", "Notify Icon clicked!");
         }
     }
 

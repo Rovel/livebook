@@ -2,16 +2,23 @@ namespace ElixirKit;
 
 using System.Diagnostics;
 
+public delegate void EventHandler(String name, String data);
+
 public class BadEventNameException : Exception
 {
     public BadEventNameException(string name) : base($"{name} is invalid") {}
 }
 
+public class BadMessage : Exception
+{
+    public BadMessage(string message) : base($"{message} is invalid") {}
+}
+
 public class ReleaseScript
 {
-    public Process Start()
+    public Process Start(EventHandler? handler = null)
     {
-        return ReleaseCommand("start");
+        return ReleaseCommand("start", handler);
     }
 
     public Process Publish(String name, String data)
@@ -33,7 +40,7 @@ public class ReleaseScript
         return process;
     }
 
-    private Process ReleaseCommand(String command, EventHandler? exited = null)
+    private Process ReleaseCommand(String command, EventHandler? handler = null)
     {
         var process = new Process();
         process.StartInfo.RedirectStandardInput = true;
@@ -41,14 +48,27 @@ public class ReleaseScript
         process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
         process.StartInfo.RedirectStandardError = true;
         process.StartInfo.StandardErrorEncoding = System.Text.Encoding.UTF8;
-        process.OutputDataReceived += new System.Diagnostics.DataReceivedEventHandler((sender, e) =>
+        process.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
         {
             if (!String.IsNullOrEmpty(e.Data))
             {
-                Console.WriteLine(e.Data);
+                if (e.Data.StartsWith("elixirkit:"))
+                {
+                    string[] parts = e.Data.Split(':', 4);
+                    String kind = parts[1];
+
+                    if (handler != null && parts[1] == "event")
+                    {
+                        handler!(parts[2], parts[3]);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(e.Data);
+                }
             }
         });
-        process.ErrorDataReceived += new System.Diagnostics.DataReceivedEventHandler((sender, e) =>
+        process.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
         {
             if (!String.IsNullOrEmpty(e.Data))
             {
@@ -59,13 +79,6 @@ public class ReleaseScript
         process.StartInfo.CreateNoWindow = true;
         process.StartInfo.FileName = "cmd.exe";
         process.StartInfo.Arguments = $"/c \"{AppDomain.CurrentDomain.BaseDirectory}rel\\bin\\app.bat {command}\"";
-
-        if (exited != null)
-        {
-            process.EnableRaisingEvents = true;
-            process.Exited += exited;
-        }
-
         process.Start();
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();

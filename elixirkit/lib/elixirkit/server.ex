@@ -12,9 +12,9 @@ defmodule ElixirKit.Server do
   end
 
   @impl true
-  def handle_info({:publish, name, data}, state) do
+  def handle_info({:event, _name, _data} = message, state) do
     Registry.dispatch(ElixirKit.Registry, "subscribers", fn entries ->
-      for {pid, _} <- entries, do: send(pid, {name, data})
+      for {pid, _} <- entries, do: send(pid, message)
     end)
 
     {:noreply, state}
