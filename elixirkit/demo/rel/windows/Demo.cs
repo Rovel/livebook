@@ -50,7 +50,14 @@ static class Demo
         }
         else
         {
-            release.Publish("dbg", "reopened app");
+            if (input == null)
+            {
+                release.Publish("dbg", "reopened app");
+            }
+            else
+            {
+                release.Publish("dbg", input);
+            }
         }
     }
 }
