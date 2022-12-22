@@ -37,14 +37,10 @@ public class App : Form
     private ElixirKit.Release release;
     private NotifyIcon trayIcon;
     private TextBox label;
+    private string? url;
 
-    public App(ElixirKit.API api, String? input)
+    public App(ElixirKit.API api, string? url)
     {
-        this.release = api.StartRelease(
-            eventHandler: this.handleReleaseEvent,
-            exitHandler: this.handleReleaseExit
-        );
-
         Icon icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath)!;
 
         this.AutoScaleMode = AutoScaleMode.Font;
@@ -62,7 +58,7 @@ public class App : Form
         this.label.Multiline = true;
         this.label.ReadOnly = true;
         this.label.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-        this.label.Text = $"Started with: {input}";
+        this.label.Text = "";
         this.label.Location = new Point(50, 180);
         this.label.Size = new Size(700, 200);
         this.Controls.Add(label);
@@ -77,6 +73,22 @@ public class App : Form
             ContextMenuStrip = menu
         };
         this.trayIcon.Click += this.handleIconClicked;
+
+        this.url = url;
+
+        this.release = api.StartRelease(
+            startHandler: this.handleReleaseStart,
+            eventHandler: this.handleReleaseEvent,
+            exitHandler: this.handleReleaseExit
+        );
+    }
+
+    private void handleReleaseStart()
+    {
+        if (this.url != null)
+        {
+            this.release.Publish("echo", "Got url: " + this.url);
+        }
     }
 
     private void handleReleaseEvent(string name, string data)
@@ -141,5 +153,4 @@ public class App : Form
         Console.WriteLine(line);
         this.label.AppendText("\r\n" + line);
     }
-
 }
