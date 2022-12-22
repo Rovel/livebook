@@ -27,11 +27,9 @@ defmodule Demo.Server do
     ElixirKit.subscribe()
 
     Task.start(fn ->
-      for i <- 5..1//-1 do
-        data = "Terminating in #{i}..."
-        log(data)
-        ElixirKit.publish("log", data)
-        Process.sleep(1000)
+      for i <- 10..1//-1 do
+        echo("Stopping in #{i}...")
+        Process.sleep(2000)
       end
 
       System.stop()
@@ -42,14 +40,20 @@ defmodule Demo.Server do
 
   @impl true
   def terminate(_reason, _state) do
-    log("Terminating")
+    echo("Terminating...")
     nil
   end
 
   @impl true
-  def handle_info({:event, "log", data}, state) do
+  def handle_info({:event, "echo", data}, state) do
     log(data)
+    ElixirKit.publish("log", data)
     {:noreply, state}
+  end
+
+  defp echo(data) do
+    log(data)
+    ElixirKit.publish("log", data)
   end
 
   defp log(data) do
