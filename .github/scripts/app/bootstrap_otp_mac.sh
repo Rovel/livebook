@@ -6,8 +6,8 @@ main() {
 
   wxwidgets_repo="${wxwidgets_repo:-wxWidgets/wxWidgets}"
   wxwidgets_ref="${wxwidgets_ref:-v3.1.7}"
-  otp_repo="${otp_repo:-wojtekmach/otp}"
-  otp_ref="${otp_ref:-wm-WX_MACOS_NON_GUI_APP}"
+  otp_repo="${otp_repo:-erlang/otp}"
+  otp_ref="${otp_ref:-OTP-25.1.2}"
 
   mkdir -p tmp/cache
 

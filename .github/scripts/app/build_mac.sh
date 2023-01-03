@@ -11,5 +11,14 @@ set -e
 . .github/scripts/app/bootstrap_mac.sh
 mix local.hex --force --if-missing
 mix local.rebar --force --if-missing
-MIX_ENV=prod MIX_TARGET=app mix deps.get --only prod
-MIX_ENV=prod MIX_TARGET=app mix release app --overwrite
+
+export MIX_ENV=prod MIX_TARGET=app
+mix deps.get --only prod
+
+cd rel/app/macos
+
+if [ -n "${ELIXIRKIT_CODESIGN_IDENTITY}" ]; then
+  ./build_dmg.sh
+else
+  ./build_app.sh
+fi

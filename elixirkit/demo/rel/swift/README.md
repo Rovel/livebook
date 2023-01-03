@@ -1,1 +1,5 @@
 # Demo
+
+## Usage
+
+    $ ./run.sh

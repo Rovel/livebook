@@ -4,11 +4,13 @@ import PackageDescription
 
 let package = Package(
     name: "Demo",
-    dependencies: [],
+    dependencies: [
+        .package(name: "ElixirKit", path: "../../../elixirkit_swift")
+    ],
     targets: [
         .executableTarget(
             name: "Demo",
-            dependencies: []
+            dependencies: ["ElixirKit"]
         )
     ]
 )

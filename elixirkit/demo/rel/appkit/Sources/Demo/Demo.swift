@@ -1,4 +1,5 @@
 import AppKit
+import ElixirKit
 
 @main
 public struct Demo {
@@ -14,6 +15,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var window : NSWindow!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        ElixirKit.API.start(name: "demo") { _ in
+            NSApp.terminate(nil)
+        }
+
+        ElixirKit.API.publish("log", "Hello from AppKit!")
+
         let menuItemOne = NSMenuItem()
         menuItemOne.submenu = NSMenu(title: "Demo")
         menuItemOne.submenu?.items = [
@@ -36,5 +43,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
         return true
+    }
+
+    func applicationWillTerminate(_ aNotification: Notification) {
+        ElixirKit.API.stop()
     }
 }

@@ -111,7 +111,7 @@ defmodule Livebook.MixProject do
     ]
   end
 
-  defp target_deps(:app), do: [{:app_bundler, path: "app_bundler"}]
+  defp target_deps(:app), do: [{:elixirkit, path: "elixirkit"}]
   defp target_deps(_), do: []
 
   @lock (with {:ok, contents} <- File.read("mix.lock"),
@@ -134,14 +134,6 @@ defmodule Livebook.MixProject do
   ## Releases
 
   defp releases do
-    macos_notarization = macos_notarization()
-
-    additional_paths = [
-      "rel/vendor/otp/erts-#{:erlang.system_info(:version)}/bin",
-      "rel/vendor/otp/bin",
-      "rel/vendor/elixir/bin"
-    ]
-
     [
       livebook: [
         include_executables_for: [:unix],
@@ -155,51 +147,10 @@ defmodule Livebook.MixProject do
         steps: [
           :assemble,
           &remove_cookie/1,
-          &standalone_erlang_elixir/1,
-          &AppBundler.bundle/1
-        ],
-        app: [
-          name: "Livebook",
-          url_schemes: ["livebook"],
-          document_types: [
-            [
-              name: "LiveMarkdown",
-              extensions: ["livemd"],
-              macos: [
-                icon_path: "rel/app/icon.png",
-                role: "Editor"
-              ],
-              windows: [
-                icon_path: "rel/app/icon.ico"
-              ]
-            ]
-          ],
-          macos: [
-            app_type: :agent,
-            icon_path: "rel/app/icon-macos.png",
-            build_dmg: macos_notarization != nil,
-            notarization: macos_notarization,
-            additional_paths: additional_paths ++ ["/usr/local/bin"]
-          ],
-          windows: [
-            icon_path: "rel/app/icon.ico",
-            build_installer: true,
-            additional_paths: additional_paths
-          ]
+          &standalone_erlang_elixir/1
         ]
       ]
     ]
-  end
-
-  defp macos_notarization do
-    identity = System.get_env("NOTARIZE_IDENTITY")
-    team_id = System.get_env("NOTARIZE_TEAM_ID")
-    apple_id = System.get_env("NOTARIZE_APPLE_ID")
-    password = System.get_env("NOTARIZE_PASSWORD")
-
-    if identity && team_id && apple_id && password do
-      [identity: identity, team_id: team_id, apple_id: apple_id, password: password]
-    end
   end
 
   defp remove_cookie(release) do
