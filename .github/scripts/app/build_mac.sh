@@ -16,7 +16,6 @@ export MIX_ENV=prod MIX_TARGET=app
 mix deps.get --only prod
 
 cd rel/app/macos
-
 if [ -n "${ELIXIRKIT_CODESIGN_IDENTITY}" ]; then
   ./build_dmg.sh
 else
