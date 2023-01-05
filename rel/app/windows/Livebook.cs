@@ -3,7 +3,7 @@ namespace Livebook;
 static class LivebookMain
 {
     [STAThread]
-    static void Main()
+    static void Main(string[] args)
     {
         ElixirKit.Utils.DebugAttachConsole();
 
@@ -21,47 +21,74 @@ static class LivebookMain
                 api.Stop();
             };
 
-            api.Publish("log", "Hello from Windows Forms!");
-
             ApplicationConfiguration.Initialize();
-            Application.Run(new LivebookForm());
+            Application.Run(new LivebookApp(api));
         }
         else
         {
-            api.Publish("log", "Hello from another instance!");
+            if (args.Length == 1 && args[0].StartsWith("open:"))
+            {
+                var url = new System.Uri(args[0].Remove(0, "open:".Length));
+                api.Publish("open", url.AbsoluteUri);
+            }
+            else
+            {
+                api.Publish("open", "");
+            }
         }
     }
 }
 
-class LivebookForm : Form
+class LivebookApp : ApplicationContext
 {
-    public LivebookForm()
+    private ElixirKit.API api;
+    private NotifyIcon notifyIcon;
+
+    public LivebookApp(ElixirKit.API api)
     {
-        InitializeComponent();
-    }
+        ThreadExit += threadExit;
 
-    // WinForms boilerplate below.
-
-    private System.ComponentModel.IContainer components = null;
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing && (components != null))
+        this.api = api;
+        ContextMenuStrip menu = new ContextMenuStrip();
+        menu.Items.Add("Open", null, openClicked);
+        menu.Items.Add("Quit", null, quitClicked);
+        notifyIcon = new NotifyIcon()
         {
-            components.Dispose();
-        }
-        base.Dispose(disposing);
+            Text = "Livebook",
+            Visible = true,
+            Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath)!,
+            ContextMenuStrip = menu
+        };
+        notifyIcon.Click += notifyIconClicked;
     }
 
-    #region Windows Form Designer generated code
-
-    private void InitializeComponent()
+    private void threadExit(object? sender, EventArgs e)
     {
-        this.components = new System.ComponentModel.Container();
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(800, 450);
-        this.Text = "Livebook";
+        notifyIcon.Visible = false;
     }
 
-    #endregion
+    private void notifyIconClicked(object? sender, EventArgs e)
+    {
+        MouseEventArgs mouseEventArgs = (MouseEventArgs)e;
+
+        if (mouseEventArgs.Button == MouseButtons.Left)
+        {
+            open();
+        }
+    }
+
+    private void openClicked(object? sender, EventArgs e)
+    {
+        open();
+    }
+
+    private void quitClicked(object? sender, EventArgs e)
+    {
+        notifyIcon.Visible = false;
+        Application.Exit();
+    }
+
+    private void open() {
+        api.Publish("open", "");
+    }
 }

@@ -24,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         button.image = NSImage(named: "MenuBarIcon")
         let menu = NSMenu()
         menu.items = [
-            NSMenuItem(title: "Open Browser", action: #selector(openBrowser), keyEquivalent: "o"),
+            NSMenuItem(title: "Open Browser", action: #selector(open), keyEquivalent: "o"),
             NSMenuItem(title: "Quit Livebook", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         ]
         statusItem.menu = menu
@@ -41,7 +41,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc
-    func openBrowser() {
+    func open() {
         ElixirKit.API.publish("open", "")
     }
 }
